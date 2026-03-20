@@ -172,3 +172,7 @@ hr {
     height: 60vh;
   }
 }
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
