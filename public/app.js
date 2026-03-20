@@ -28,6 +28,21 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
+setTimeout(() => {
+  map.invalidateSize();
+}, 300);
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 300);
+});
+
+window.addEventListener("resize", () => {
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 150);
+});
 // Load dữ liệu đã lưu
 const savedName = localStorage.getItem(STORAGE_NAME);
 const savedColor = localStorage.getItem(STORAGE_COLOR);
