@@ -14,17 +14,23 @@
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <div class="app">
-    <div class="sidebar">
-      <h1>Bản đồ realtime</h1>
+  <div class="app-shell">
+    <button id="menuToggle" class="menu-toggle" type="button">☰</button>
+
+    <aside id="sidebar" class="sidebar collapsed">
+      <div class="sidebar-header">
+        <h1>Bản đồ realtime</h1>
+        <button id="closeSidebar" class="close-btn" type="button">✕</button>
+      </div>
+
       <p class="muted">
-        Tên và icon sẽ được lưu trên trình duyệt để lần sau không cần nhập lại.
+        Tên và ảnh marker sẽ được lưu trên trình duyệt để lần sau không cần nhập lại.
       </p>
 
       <label for="nameInput">Tên hiển thị</label>
       <input id="nameInput" type="text" placeholder="Ví dụ: Hoang" maxlength="30" />
 
-      <label for="colorInput">Màu mặc định của marker</label>
+      <label for="colorInput">Màu marker mặc định</label>
       <input id="colorInput" type="color" value="#2f80ed" />
 
       <label for="avatarInput">Ảnh marker tròn (tùy chọn)</label>
@@ -37,11 +43,6 @@
 
       <div class="row">
         <button id="saveProfileBtn">Lưu thông tin</button>
-        <button id="shareBtn">Bắt đầu chia sẻ</button>
-      </div>
-
-      <div class="row">
-        <button id="stopBtn" class="danger">Dừng chia sẻ</button>
       </div>
 
       <div id="status" class="status">Chưa chia sẻ vị trí.</div>
@@ -54,11 +55,13 @@
       </div>
 
       <div class="note">
-        Khi bấm <b>Bắt đầu chia sẻ</b>, vị trí sẽ hiển thị công khai cho những người đang ở trên web này.
+        Khi bấm <b>Bắt đầu chia sẻ</b>, vị trí của bạn sẽ hiển thị công khai cho những người đang ở trên web này.
       </div>
-    </div>
+    </aside>
 
-    <div id="map"></div>
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <main id="map"></main>
   </div>
 
   <script
