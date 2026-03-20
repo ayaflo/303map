@@ -107,48 +107,6 @@ function saveProfile() {
   localStorage.setItem(STORAGE_NAME, name);
   localStorage.setItem(STORAGE_COLOR, color);
 
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-
-  socket.emit("remove-me");
-  setStatus("Đã dừng chia sẻ vị trí.");
-
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-
-  hasCenteredOnMe = false;
-
-  watchId = navigator.geolocation.watchPosition(
-    (position) => {
-      emitCurrentLocation(position);
-    },
-    (error) => {
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          setStatus("Bạn đã từ chối quyền truy cập vị trí.");
-          break;
-        case error.POSITION_UNAVAILABLE:
-          setStatus("Không thể xác định vị trí hiện tại.");
-          break;
-        case error.TIMEOUT:
-          setStatus("Lấy vị trí bị quá thời gian.");
-          break;
-        default:
-          setStatus("Có lỗi khi theo dõi vị trí.");
-      }
-
-      console.error("[geolocation error]", error);
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 3000,
-      timeout: 10000
-    }
-  );
 
   closeSidebarPanel();
 }
