@@ -291,8 +291,9 @@ colorInput.addEventListener("input", () => {
 });
 
 saveProfileBtn.addEventListener("click", saveProfile);
-shareBtn.addEventListener("click", startSharing);
-stopBtn.addEventListener("click", stopSharing);
+//shareBtn.addEventListener("click", startSharing);
+//stopBtn.addEventListener("click", stopSharing);
+startSharing();
 
 socket.on("users-update", (users) => {
   renderUsers(users);
