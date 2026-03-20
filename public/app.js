@@ -107,8 +107,7 @@ function saveProfile() {
   localStorage.setItem(STORAGE_NAME, name);
   localStorage.setItem(STORAGE_COLOR, color);
 
-
-  closeSidebarPanel();
+  setStatus(`Đã lưu thông tin: ${name}`);
 }
 
 function updateAvatarPreview(dataUrl) {
@@ -309,26 +308,7 @@ function stopSharing() {
   setStatus("Đã dừng chia sẻ vị trí.");
 }
 
-// avatarInput.addEventListener("change", (e) => {
-//   const file = e.target.files?.[0];
-//   if (!file) return;
-
-//   if (!file.type.startsWith("image/")) {
-//     setStatus("File được chọn không phải ảnh.");
-//     return;
-//   }
-
-//   const reader = new FileReader();
-//   reader.onload = () => {
-//     const dataUrl = String(reader.result || "");
-//     localStorage.setItem(STORAGE_AVATAR, dataUrl);
-//     updateAvatarPreview(dataUrl);
-//     setStatus("Đã lưu ảnh marker.");
-//   };
-//   reader.readAsDataURL(file);
-// });
-
-avatarInput.addEventListener("change", async (e) => {
+avatarInput.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
@@ -337,37 +317,14 @@ avatarInput.addEventListener("change", async (e) => {
     return;
   }
 
-  setStatus("Đang xử lý ảnh marker...");
-
-  try {
-    let dataUrl = await compressImageToMarkerDataUrl(file, 160, 0.82);
-
-    // nếu vẫn còn hơi lớn thì nén thêm một nhịp nữa
-    if (dataUrl.length > 350000) {
-      dataUrl = await compressImageToMarkerDataUrl(file, 128, 0.72);
-    }
-
-    // nếu vẫn quá lớn, giảm tiếp
-    if (dataUrl.length > 250000) {
-      dataUrl = await compressImageToMarkerDataUrl(file, 96, 0.65);
-    }
-
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = String(reader.result || "");
     localStorage.setItem(STORAGE_AVATAR, dataUrl);
     updateAvatarPreview(dataUrl);
     setStatus("Đã lưu ảnh marker.");
-
-    if (watchId !== null && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          emitCurrentLocation(position);
-        },
-        () => {}
-      );
-    }
-  } catch (err) {
-    console.error("Lỗi xử lý ảnh:", err);
-    setStatus("Không xử lý được ảnh.");
-  }
+  };
+  reader.readAsDataURL(file);
 });
 
 clearAvatarBtn.addEventListener("click", () => {
@@ -388,11 +345,11 @@ nameInput.addEventListener("keydown", (e) => {
     saveProfile();
   }
 });
-startSharing();
+
 saveProfileBtn.addEventListener("click", saveProfile);
 //shareBtn.addEventListener("click", startSharing);
 //stopBtn.addEventListener("click", stopSharing);
-
+startSharing();
 
 menuToggle.addEventListener("click", openSidebar);
 closeSidebar.addEventListener("click", closeSidebarPanel);
@@ -409,11 +366,3 @@ window.addEventListener("beforeunload", () => {
     navigator.geolocation.clearWatch(watchId);
   }
 });
-
-if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-
-  socket.emit("remove-me");
-  setStatus("Đã dừng chia sẻ vị trí.");
