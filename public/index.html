@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bản đồ vị trí realtime</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <h1>Bản đồ realtime</h1>
+      <p class="muted">
+        Tên và icon sẽ được lưu trên trình duyệt để lần sau không cần nhập lại.
+      </p>
+
+      <label for="nameInput">Tên hiển thị</label>
+      <input id="nameInput" type="text" placeholder="Ví dụ: Hoang" maxlength="30" />
+
+      <label for="colorInput">Màu mặc định của marker</label>
+      <input id="colorInput" type="color" value="#2f80ed" />
+
+      <label for="avatarInput">Ảnh marker tròn (tùy chọn)</label>
+      <input id="avatarInput" type="file" accept="image/*" />
+
+      <div class="avatar-preview-wrap">
+        <div id="avatarPreview" class="avatar-preview default-preview"></div>
+        <button id="clearAvatarBtn" type="button" class="danger small-btn">Xóa ảnh</button>
+      </div>
+
+      <div class="row">
+        <button id="saveProfileBtn">Lưu thông tin</button>
+        <button id="shareBtn">Bắt đầu chia sẻ</button>
+      </div>
+
+      <div class="row">
+        <button id="stopBtn" class="danger">Dừng chia sẻ</button>
+      </div>
+
+      <div id="status" class="status">Chưa chia sẻ vị trí.</div>
+
+      <hr />
+
+      <div>
+        <strong>Số người đang hiển thị:</strong>
+        <div id="userCount">0</div>
+      </div>
+
+      <div class="note">
+        Khi bấm <b>Bắt đầu chia sẻ</b>, vị trí sẽ hiển thị công khai cho những người đang ở trên web này.
+      </div>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <script
+    src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="/app.js"></script>
+</body>
+</html>
