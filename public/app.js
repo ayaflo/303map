@@ -351,7 +351,26 @@ function stopSharing() {
   setStatus("Đã dừng chia sẻ vị trí.");
 }
 
-avatarInput.addEventListener("change", (e) => {
+// avatarInput.addEventListener("change", (e) => {
+//   const file = e.target.files?.[0];
+//   if (!file) return;
+
+//   if (!file.type.startsWith("image/")) {
+//     setStatus("File được chọn không phải ảnh.");
+//     return;
+//   }
+
+//   const reader = new FileReader();
+//   reader.onload = () => {
+//     const dataUrl = String(reader.result || "");
+//     localStorage.setItem(STORAGE_AVATAR, dataUrl);
+//     updateAvatarPreview(dataUrl);
+//     setStatus("Đã lưu ảnh marker.");
+//   };
+//   reader.readAsDataURL(file);
+// });
+
+avatarInput.addEventListener("change", async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
@@ -360,14 +379,37 @@ avatarInput.addEventListener("change", (e) => {
     return;
   }
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    const dataUrl = String(reader.result || "");
+  setStatus("Đang xử lý ảnh marker...");
+
+  try {
+    let dataUrl = await compressImageToMarkerDataUrl(file, 160, 0.82);
+
+    // nếu vẫn còn hơi lớn thì nén thêm một nhịp nữa
+    if (dataUrl.length > 350000) {
+      dataUrl = await compressImageToMarkerDataUrl(file, 128, 0.72);
+    }
+
+    // nếu vẫn quá lớn, giảm tiếp
+    if (dataUrl.length > 250000) {
+      dataUrl = await compressImageToMarkerDataUrl(file, 96, 0.65);
+    }
+
     localStorage.setItem(STORAGE_AVATAR, dataUrl);
     updateAvatarPreview(dataUrl);
     setStatus("Đã lưu ảnh marker.");
-  };
-  reader.readAsDataURL(file);
+
+    if (watchId !== null && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          emitCurrentLocation(position);
+        },
+        () => {}
+      );
+    }
+  } catch (err) {
+    console.error("Lỗi xử lý ảnh:", err);
+    setStatus("Không xử lý được ảnh.");
+  }
 });
 
 clearAvatarBtn.addEventListener("click", () => {
@@ -409,3 +451,11 @@ window.addEventListener("beforeunload", () => {
     navigator.geolocation.clearWatch(watchId);
   }
 });
+
+if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+
+  socket.emit("remove-me");
+  setStatus("Đã dừng chia sẻ vị trí.");
