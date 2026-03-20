@@ -345,11 +345,11 @@ nameInput.addEventListener("keydown", (e) => {
     saveProfile();
   }
 });
-
+startSharing();
 saveProfileBtn.addEventListener("click", saveProfile);
 shareBtn.addEventListener("click", startSharing);
 stopBtn.addEventListener("click", stopSharing);
-//startSharing();
+
 
 menuToggle.addEventListener("click", openSidebar);
 closeSidebar.addEventListener("click", closeSidebarPanel);
