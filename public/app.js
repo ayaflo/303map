@@ -11,10 +11,30 @@ const stopBtn = document.getElementById("stopBtn");
 const statusBox = document.getElementById("status");
 const userCount = document.getElementById("userCount");
 
-const menuToggle = document.getElementById("menuToggle");
-const closeSidebar = document.getElementById("closeSidebar");
-const sidebar = document.getElementById("sidebar");
-const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggle = document.getElementById("menuToggle");
+  const closeSidebar = document.getElementById("closeSidebar");
+  const sidebar = document.getElementById("sidebar");
+  const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+
+  function openSidebar() {
+    sidebar.classList.remove("collapsed");
+    sidebarBackdrop.classList.remove("hidden");
+  }
+
+  function closeSidebarPanel() {
+    sidebar.classList.add("collapsed");
+    sidebarBackdrop.classList.add("hidden");
+  }
+
+  if (menuToggle && closeSidebar && sidebar && sidebarBackdrop) {
+    menuToggle.addEventListener("click", openSidebar);
+    closeSidebar.addEventListener("click", closeSidebarPanel);
+    sidebarBackdrop.addEventListener("click", closeSidebarPanel);
+  } else {
+    console.error("Thiếu element menu");
+  }
+});
 
 const STORAGE_NAME = "saved_display_name";
 const STORAGE_COLOR = "saved_marker_color";
