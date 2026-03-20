@@ -28,15 +28,23 @@ function sanitizeColor(color) {
   return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : "#2f80ed";
 }
 
+// function sanitizeAvatar(avatar) {
+//   if (typeof avatar !== "string") return null;
+//   // chỉ cho phép data url image để demo localStorage cho đơn giản
+//   if (avatar.startsWith("data:image/")) {
+//     // giới hạn cho đỡ phình payload
+//     return avatar.slice(0, 300000);
+//   }
+//   return null;
+// }
 function sanitizeAvatar(avatar) {
   if (typeof avatar !== "string") return null;
-  // chỉ cho phép data url image để demo localStorage cho đơn giản
-  if (avatar.startsWith("data:image/")) {
-    // giới hạn cho đỡ phình payload
-    return avatar.slice(0, 300000);
-  }
-  return null;
+  if (!avatar.startsWith("data:image/")) return null;
+
+  if (avatar.length > 400000) return null;
+  return avatar;
 }
+
 
 function isValidCoord(value) {
   return typeof value === "number" && Number.isFinite(value);
