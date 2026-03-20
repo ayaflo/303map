@@ -108,6 +108,7 @@ function saveProfile() {
   localStorage.setItem(STORAGE_COLOR, color);
 
   setStatus(`Đã lưu thông tin: ${name}`);
+  closeSidebarPanel();
 }
 
 function updateAvatarPreview(dataUrl) {
