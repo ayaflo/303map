@@ -16,6 +16,14 @@ const PORT = process.env.PORT || 3000;
 const users = new Map();
 
 app.use(express.static(path.join(__dirname, "public")));
+//
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: "map-realtime",
+    time: Date.now()
+  });
+});
 
 function sanitizeName(name) {
   if (!name || typeof name !== "string") return "Anonymous";
