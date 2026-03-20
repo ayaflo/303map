@@ -11,6 +11,11 @@ const stopBtn = document.getElementById("stopBtn");
 const statusBox = document.getElementById("status");
 const userCount = document.getElementById("userCount");
 
+const menuToggle = document.getElementById("menuToggle");
+const closeSidebar = document.getElementById("closeSidebar");
+const sidebar = document.getElementById("sidebar");
+const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+
 const STORAGE_NAME = "saved_display_name";
 const STORAGE_COLOR = "saved_marker_color";
 const STORAGE_AVATAR = "saved_marker_avatar";
@@ -28,6 +33,11 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
+// Sidebar mặc định thu gọn
+sidebar.classList.add("collapsed");
+sidebarBackdrop.classList.add("hidden");
+
+// Fix render map trên mobile / khi layout thay đổi
 setTimeout(() => {
   map.invalidateSize();
 }, 300);
@@ -43,6 +53,7 @@ window.addEventListener("resize", () => {
     map.invalidateSize();
   }, 150);
 });
+
 // Load dữ liệu đã lưu
 const savedName = localStorage.getItem(STORAGE_NAME);
 const savedColor = localStorage.getItem(STORAGE_COLOR);
@@ -92,6 +103,24 @@ function updateAvatarPreview(dataUrl) {
   }
 }
 
+function openSidebar() {
+  sidebar.classList.remove("collapsed");
+  sidebarBackdrop.classList.remove("hidden");
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 250);
+}
+
+function closeSidebarPanel() {
+  sidebar.classList.add("collapsed");
+  sidebarBackdrop.classList.add("hidden");
+
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 250);
+}
+
 function escapeHtml(str) {
   return String(str)
     .replaceAll("&", "&amp;")
@@ -112,21 +141,15 @@ function buildMarkerHtml(user) {
 
   return `
     <div 
-      style="
-        width:46px;
-        height:46px;
-        border-radius:50%;
-        border:3px solid white;
-        box-shadow:0 2px 10px rgba(0,0,0,0.35);
-        ${bgStyle}
-      "
+      class="marker-circle"
+      style="${bgStyle}"
     ></div>
   `;
 }
 
 function createUserIcon(user) {
   return L.divIcon({
-    className: "",
+    className: "custom-marker",
     html: buildMarkerHtml(user),
     iconSize: [46, 46],
     iconAnchor: [23, 23],
@@ -201,6 +224,10 @@ function emitCurrentLocation(position) {
   if (!hasCenteredOnMe) {
     map.setView([lat, lng], 16);
     hasCenteredOnMe = true;
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
   }
 }
 
@@ -238,6 +265,7 @@ function startSharing() {
         default:
           setStatus("Có lỗi khi theo dõi vị trí.");
       }
+
       console.error("[geolocation error]", error);
     },
     {
@@ -246,6 +274,8 @@ function startSharing() {
       timeout: 10000
     }
   );
+
+  closeSidebarPanel();
 }
 
 function stopSharing() {
@@ -290,10 +320,19 @@ colorInput.addEventListener("input", () => {
   }
 });
 
+nameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    saveProfile();
+  }
+});
+
 saveProfileBtn.addEventListener("click", saveProfile);
-//shareBtn.addEventListener("click", startSharing);
-//stopBtn.addEventListener("click", stopSharing);
-startSharing();
+shareBtn.addEventListener("click", startSharing);
+stopBtn.addEventListener("click", stopSharing);
+
+menuToggle.addEventListener("click", openSidebar);
+closeSidebar.addEventListener("click", closeSidebarPanel);
+sidebarBackdrop.addEventListener("click", closeSidebarPanel);
 
 socket.on("users-update", (users) => {
   renderUsers(users);
@@ -301,6 +340,7 @@ socket.on("users-update", (users) => {
 
 window.addEventListener("beforeunload", () => {
   socket.emit("remove-me");
+
   if (watchId !== null) {
     navigator.geolocation.clearWatch(watchId);
   }
