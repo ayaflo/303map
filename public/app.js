@@ -18,8 +18,9 @@ const STORAGE_AVATAR = "saved_marker_avatar";
 const markers = new Map();
 
 let watchId = null;
+let hasCenteredOnMe = false;
 
-// khởi tạo map
+// Khởi tạo map
 const map = L.map("map").setView([16.0471, 108.2068], 5);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -27,7 +28,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors"
 }).addTo(map);
 
-// load dữ liệu đã lưu
+// Load dữ liệu đã lưu
 const savedName = localStorage.getItem(STORAGE_NAME);
 const savedColor = localStorage.getItem(STORAGE_COLOR);
 const savedAvatar = localStorage.getItem(STORAGE_AVATAR);
@@ -38,6 +39,7 @@ updateAvatarPreview(savedAvatar || null);
 
 function setStatus(text) {
   statusBox.textContent = text;
+  console.log("[STATUS]", text);
 }
 
 function getDisplayName() {
@@ -85,18 +87,31 @@ function escapeHtml(str) {
 }
 
 function buildMarkerHtml(user) {
-  const safeColor = /^#[0-9a-fA-F]{6}$/.test(user.color || "") ? user.color : "#2f80ed";
+  const safeColor = /^#[0-9a-fA-F]{6}$/.test(user.color || "")
+    ? user.color
+    : "#2f80ed";
 
-  if (user.avatar) {
-    return `<div class="marker-circle" style="background-image:url('${user.avatar}')"></div>`;
-  }
+  const bgStyle = user.avatar
+    ? `background-image:url('${user.avatar}'); background-size:cover; background-position:center;`
+    : `background:${safeColor};`;
 
-  return `<div class="marker-circle" style="background:${safeColor}"></div>`;
+  return `
+    <div 
+      style="
+        width:46px;
+        height:46px;
+        border-radius:50%;
+        border:3px solid white;
+        box-shadow:0 2px 10px rgba(0,0,0,0.35);
+        ${bgStyle}
+      "
+    ></div>
+  `;
 }
 
 function createUserIcon(user) {
   return L.divIcon({
-    className: "custom-marker",
+    className: "",
     html: buildMarkerHtml(user),
     iconSize: [46, 46],
     iconAnchor: [23, 23],
@@ -105,6 +120,8 @@ function createUserIcon(user) {
 }
 
 function renderUsers(users) {
+  console.log("[users-update]", users);
+
   const incomingIds = new Set();
 
   users.forEach((user) => {
@@ -141,11 +158,6 @@ function renderUsers(users) {
   }
 
   userCount.textContent = String(users.length);
-
-  if (users.length > 0) {
-    const bounds = L.latLngBounds(users.map((u) => [u.lat, u.lng]));
-    map.fitBounds(bounds, { padding: [40, 40] });
-  }
 }
 
 function emitCurrentLocation(position) {
@@ -159,6 +171,8 @@ function emitCurrentLocation(position) {
   const lat = position.coords.latitude;
   const lng = position.coords.longitude;
 
+  console.log("[emit location]", { name, lat, lng, color, hasAvatar: !!avatar });
+
   socket.emit("share-location", {
     name,
     lat,
@@ -168,6 +182,11 @@ function emitCurrentLocation(position) {
   });
 
   setStatus(`Đang chia sẻ vị trí realtime với tên: ${name}`);
+
+  if (!hasCenteredOnMe) {
+    map.setView([lat, lng], 16);
+    hasCenteredOnMe = true;
+  }
 }
 
 function startSharing() {
@@ -184,10 +203,11 @@ function startSharing() {
     watchId = null;
   }
 
+  hasCenteredOnMe = false;
+
   watchId = navigator.geolocation.watchPosition(
     (position) => {
       emitCurrentLocation(position);
-      map.setView([position.coords.latitude, position.coords.longitude], 15);
     },
     (error) => {
       switch (error.code) {
@@ -203,6 +223,7 @@ function startSharing() {
         default:
           setStatus("Có lỗi khi theo dõi vị trí.");
       }
+      console.error("[geolocation error]", error);
     },
     {
       enableHighAccuracy: true,
