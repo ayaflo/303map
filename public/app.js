@@ -347,8 +347,9 @@ nameInput.addEventListener("keydown", (e) => {
 });
 
 saveProfileBtn.addEventListener("click", saveProfile);
-shareBtn.addEventListener("click", startSharing);
-stopBtn.addEventListener("click", stopSharing);
+//shareBtn.addEventListener("click", startSharing);
+//stopBtn.addEventListener("click", stopSharing);
+startSharing();
 
 menuToggle.addEventListener("click", openSidebar);
 closeSidebar.addEventListener("click", closeSidebarPanel);
