@@ -308,6 +308,25 @@ function stopSharing() {
   setStatus("Đã dừng chia sẻ vị trí.");
 }
 
+// avatarInput.addEventListener("change", (e) => {
+//   const file = e.target.files?.[0];
+//   if (!file) return;
+
+//   if (!file.type.startsWith("image/")) {
+//     setStatus("File được chọn không phải ảnh.");
+//     return;
+//   }
+
+//   const reader = new FileReader();
+//   reader.onload = () => {
+//     const dataUrl = String(reader.result || "");
+//     localStorage.setItem(STORAGE_AVATAR, dataUrl);
+//     updateAvatarPreview(dataUrl);
+//     setStatus("Đã lưu ảnh marker.");
+//   };
+//   reader.readAsDataURL(file);
+// });
+
 avatarInput.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
@@ -317,13 +336,58 @@ avatarInput.addEventListener("change", (e) => {
     return;
   }
 
+  const img = new Image();
   const reader = new FileReader();
+
   reader.onload = () => {
-    const dataUrl = String(reader.result || "");
+    img.src = reader.result;
+  };
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    let width = img.width;
+    let height = img.height;
+
+    // 🔻 Giới hạn kích thước tối đa (giúp giảm dung lượng nhanh)
+    const MAX_WIDTH = 500;
+    if (width > MAX_WIDTH) {
+      height *= MAX_WIDTH / width;
+      width = MAX_WIDTH;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    let quality = 0.9;
+    let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+    // 🔁 Giảm dần quality đến khi < 50KB
+    while (dataUrl.length > 50 * 1024 && quality > 0.1) {
+      quality -= 0.1;
+      dataUrl = canvas.toDataURL("image/jpeg", quality);
+    }
+
+    // ⚠️ Nếu vẫn lớn → giảm tiếp kích thước
+    if (dataUrl.length > 50 * 1024) {
+      width *= 0.8;
+      height *= 0.8;
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+    }
+
     localStorage.setItem(STORAGE_AVATAR, dataUrl);
     updateAvatarPreview(dataUrl);
-    setStatus("Đã lưu ảnh marker.");
+    setStatus("Đã lưu ảnh (đã nén < 50KB).");
   };
+
   reader.readAsDataURL(file);
 });
 
